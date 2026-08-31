@@ -44,6 +44,8 @@ This will return the true streaming URL of the webcam as a string.
 
 This will redirect the request to the true streaming URL of the webcam. Use this endpoint with other applications as the URL of your stream.
 
+Surfchex and Surfline cams are served as a playlist from this endpoint rather than a redirect, because those providers require a header or a short-lived token that a player can't supply on its own. The video segments themselves still come straight from the provider's CDN.
+
 #### Examples
 
     /stream/surfchex/avon
