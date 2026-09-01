@@ -5,12 +5,15 @@ GEM
       mini_mime (>= 1.0.0)
       multi_xml (>= 0.5.2)
     mini_mime (1.1.2)
+    minitest (5.26.1)
     multi_xml (0.6.0)
     mustermann (3.0.0)
       ruby2_keywords (~> 0.0.1)
     rack (2.2.7)
     rack-protection (3.0.6)
       rack
+    rack-test (2.2.0)
+      rack (>= 1.3)
     ruby2_keywords (0.0.5)
     sinatra (3.0.6)
       mustermann (~> 3.0)
@@ -26,6 +29,8 @@ PLATFORMS
 
 DEPENDENCIES
   httparty
+  minitest
+  rack-test
   sinatra
   webrick
 

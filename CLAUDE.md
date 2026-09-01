@@ -17,7 +17,29 @@ docker build -t webcam-resolver .
 
 # Run via Docker (maps to port 8000)
 docker run -it --name webcam-resolver -p 8000:4567 webcam-resolver
+
+# Tests (build the image first; there is no host ruby). The mount runs your
+# working copy, so editing a test doesn't mean rebuilding the image.
+docker run --rm -v "$PWD":/code webcam-resolver bundle exec ruby test/playlist_test.rb  # offline
+docker run --rm -v "$PWD":/code webcam-resolver bundle exec ruby test/live_test.rb      # hits providers
 ```
+
+## Tests
+
+`test/playlist_test.rb` is offline and fast: it covers `best_variant` and
+`rewrite_playlist`, the logic both playlist-serving providers share.
+
+`test/live_test.rb` resolves a real cam from each provider. That's deliberate --
+resolution is screen scraping plus undocumented endpoints, so the failure worth
+catching is a provider changing something, which no mocked test would see. Every
+provider is asserted all the way to "a segment actually fetches", including the
+one that redirects, since a stale redirect target is exactly the sort of thing a
+URL-shaped assertion waves through. `test_surfchex_serves_the_live_stream_and_not_the_promo_loop`
+guards the silent failure described under "Surfchex: stream passes" below.
+
+When a live test fails, check the cam in a browser first -- a cam that has simply
+gone offline looks the same as provider drift. The cams are named in constants at
+the top of the file; swap one out if it goes away for good.
 
 ## Architecture
 

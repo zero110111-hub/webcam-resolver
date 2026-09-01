@@ -52,6 +52,16 @@ Surfchex and Surfline cams are served as a playlist from this endpoint rather th
     /stream/ipcamlive/broadwaycam
     /stream/surfline/58349ab8e411dc743a5d52a0
 
+## Tests
+
+    docker build -t webcam-resolver .
+    docker run --rm -v "$PWD":/code webcam-resolver bundle exec ruby test/playlist_test.rb
+    docker run --rm -v "$PWD":/code webcam-resolver bundle exec ruby test/live_test.rb
+
+The live suite resolves a real cam from each provider, so it needs a network
+connection and will fail if a provider changes how their site works -- which is
+the point of it.
+
 ## Installation
 
 This project was designed to be hosted by Docker. You can run it manually, but it is not recommended.
