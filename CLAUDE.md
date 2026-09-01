@@ -84,3 +84,17 @@ variant before rewriting, so segment and `#EXT-X-MAP` URIs always come back abso
 ## Deployment
 
 Docker image published to `ghcr.io/maddox/webcam-resolver` via GitHub Actions on push to main. Builds for both amd64 and arm64 platforms.
+
+### Workflows
+
+`tests.yml` has no triggers of its own -- it is the one definition of "run the
+suite", called from the other two. `docker-publish.yml` calls it as a `test` job
+that `build` depends on, so a failing test blocks publishing (and runs on every
+PR and every push to main). `tests-daily.yml` calls it on a daily cron, so
+provider drift surfaces even when nobody touches the repo.
+
+The schedule is deliberately in its own file. GitHub disables *scheduled*
+workflows after 60 days of repository inactivity -- that is what silently stopped
+publishing in August 2026 -- so if it happens again the daily drift check goes
+quiet while the publish gate keeps working. A failing live test blocks publishing
+by design; if a cam dies for good, swap the constant in `test/live_test.rb`.
