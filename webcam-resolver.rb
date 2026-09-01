@@ -84,6 +84,21 @@ def best_variant(playlist)
   top && lines[(top + 1)..-1].find { |l| !l.empty? && !l.start_with?('#') }
 end
 
+# Rewrite a media playlist's relative names -- segments, and the `URI="..."` of
+# tags like #EXT-X-MAP -- to absolute URLs against the playlist's own address.
+def rewrite_playlist(playlist, base)
+  playlist.each_line.map do |line|
+    stripped = line.strip
+    if stripped.empty?
+      line
+    elsif stripped.start_with?('#')
+      line.sub(/URI="([^"]+)"/) { "URI=\"#{absolutize($1, base)}\"" }
+    else
+      "#{absolutize(stripped, base)}\n"
+    end
+  end.join
+end
+
 # Hand the client a media playlist whose segment URLs are absolute, so it pulls
 # video straight from the provider's CDN with no proxying on our side.
 def resolve_playlist(url, headers = {})
@@ -101,16 +116,7 @@ def resolve_playlist(url, headers = {})
   # to a player dressed up as m3u8.
   return nil unless playlist.start_with?('#EXTM3U')
 
-  playlist.each_line.map do |line|
-    stripped = line.strip
-    if stripped.empty?
-      line
-    elsif stripped.start_with?('#')
-      line.sub(/URI="([^"]+)"/) { "URI=\"#{absolutize($1, url)}\"" }
-    else
-      "#{absolutize(stripped, url)}\n"
-    end
-  end.join
+  rewrite_playlist(playlist, url)
 end
 
 get '/' do
