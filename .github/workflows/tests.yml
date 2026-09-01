@@ -1,0 +1,31 @@
+name: Tests
+
+# No triggers of its own on purpose. This is the single definition of "run the
+# tests", called by the Docker workflow (where it gates publishing) and by the
+# daily drift check. Keeping the schedule out of this file matters: GitHub
+# disables *scheduled* workflows after 60 days of repository inactivity, and if
+# that ever happened to this one, publishing would lose its test gate.
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: ruby:2.7.4
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: bundle install --jobs 4
+
+      - name: Offline suite
+        run: bundle exec ruby test/playlist_test.rb
+
+      # Resolves a real cam from each provider, so this is the step that catches a
+      # provider changing their site. It can also fail because a cam went offline:
+      # check the cam in a browser before assuming the code broke.
+      - name: Live provider suite
+        run: bundle exec ruby test/live_test.rb

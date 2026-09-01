@@ -21,7 +21,12 @@ env:
 
 
 jobs:
+  # Nothing gets published unless the suite passes first.
+  test:
+    uses: ./.github/workflows/tests.yml
+
   build:
+    needs: test
 
     runs-on: ubuntu-latest
     permissions:

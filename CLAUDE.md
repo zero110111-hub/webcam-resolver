@@ -17,7 +17,29 @@ docker build -t webcam-resolver .
 
 # Run via Docker (maps to port 8000)
 docker run -it --name webcam-resolver -p 8000:4567 webcam-resolver
+
+# Tests (build the image first; there is no host ruby). The mount runs your
+# working copy, so editing a test doesn't mean rebuilding the image.
+docker run --rm -v "$PWD":/code webcam-resolver bundle exec ruby test/playlist_test.rb  # offline
+docker run --rm -v "$PWD":/code webcam-resolver bundle exec ruby test/live_test.rb      # hits providers
 ```
+
+## Tests
+
+`test/playlist_test.rb` is offline and fast: it covers `best_variant` and
+`rewrite_playlist`, the logic both playlist-serving providers share.
+
+`test/live_test.rb` resolves a real cam from each provider. That's deliberate --
+resolution is screen scraping plus undocumented endpoints, so the failure worth
+catching is a provider changing something, which no mocked test would see. Every
+provider is asserted all the way to "a segment actually fetches", including the
+one that redirects, since a stale redirect target is exactly the sort of thing a
+URL-shaped assertion waves through. `test_surfchex_serves_the_live_stream_and_not_the_promo_loop`
+guards the silent failure described under "Surfchex: stream passes" below.
+
+When a live test fails, check the cam in a browser first -- a cam that has simply
+gone offline looks the same as provider drift. The cams are named in constants at
+the top of the file; swap one out if it goes away for good.
 
 ## Architecture
 
@@ -62,3 +84,17 @@ variant before rewriting, so segment and `#EXT-X-MAP` URIs always come back abso
 ## Deployment
 
 Docker image published to `ghcr.io/maddox/webcam-resolver` via GitHub Actions on push to main. Builds for both amd64 and arm64 platforms.
+
+### Workflows
+
+`tests.yml` has no triggers of its own -- it is the one definition of "run the
+suite", called from the other two. `docker-publish.yml` calls it as a `test` job
+that `build` depends on, so a failing test blocks publishing (and runs on every
+PR and every push to main). `tests-daily.yml` calls it on a daily cron, so
+provider drift surfaces even when nobody touches the repo.
+
+The schedule is deliberately in its own file. GitHub disables *scheduled*
+workflows after 60 days of repository inactivity -- that is what silently stopped
+publishing in August 2026 -- so if it happens again the daily drift check goes
+quiet while the publish gate keeps working. A failing live test blocks publishing
+by design; if a cam dies for good, swap the constant in `test/live_test.rb`.

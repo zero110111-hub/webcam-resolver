@@ -1,0 +1,17 @@
+name: Tests (daily)
+
+# The providers this service scrapes change their sites without warning, so the
+# live suite is worth running even when nobody has touched the repo.
+#
+# This lives in its own workflow rather than in tests.yml because a scheduled
+# workflow gets disabled after 60 days of repository inactivity -- that is what
+# silently stopped the Docker workflow in August 2026. If that happens here, this
+# daily check goes quiet, but the same tests still gate every publish.
+on:
+  schedule:
+    - cron: '26 4 * * *'
+  workflow_dispatch:
+
+jobs:
+  test:
+    uses: ./.github/workflows/tests.yml
