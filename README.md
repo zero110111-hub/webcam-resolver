@@ -19,7 +19,7 @@ The provider is the name of the provider that hosts the webcam. The camera_id is
   - provider: `surfchex`
 - IPCamLive
 
-  - example URL: `https://www.ipcamlive.com/6495b042d1523`
+  - example URL: `https://www.ipcamlive.com/broadwaycam`
   - provider: `ipcamlive`
 - Surfline
 
@@ -37,7 +37,7 @@ This will return the true streaming URL of the webcam as a string.
 #### Examples
 
     /camera/surfchex/avon
-    /camera/ipcamlive/6495b042d1523
+    /camera/ipcamlive/broadwaycam
     /camera/surfline/58349ab8e411dc743a5d52a0
 
 ### `GET` /stream/:provider/:camera_id
@@ -49,7 +49,7 @@ Surfchex and Surfline cams are served as a playlist from this endpoint rather th
 #### Examples
 
     /stream/surfchex/avon
-    /stream/ipcamlive/6495b042d1523
+    /stream/ipcamlive/broadwaycam
     /stream/surfline/58349ab8e411dc743a5d52a0
 
 ## Installation
