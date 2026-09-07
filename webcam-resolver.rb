@@ -151,11 +151,11 @@ get '/stream/:provider/:camera' do
   playlist
 end
 
-get '/stream/:provider/:camera.m3u8' do
-  url = get_camera_url(params['provider'], params['camera'])
+get %r{/stream/([^/]+)/(.+)\.m3u8$} do |provider, camera|
+  url = get_camera_url(provider, camera)
   halt 404, 'Camera not found' unless url
 
-  cdn_headers = PLAYLIST_HEADERS[params['provider']]
+  cdn_headers = PLAYLIST_HEADERS[provider]
   redirect url unless cdn_headers
 
   playlist = resolve_playlist(url, cdn_headers)
