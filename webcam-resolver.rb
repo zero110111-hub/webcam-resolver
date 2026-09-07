@@ -150,3 +150,16 @@ get '/stream/:provider/:camera' do
   content_type 'application/vnd.apple.mpegurl'
   playlist
 end
+
+get '/stream/:provider/:camera.m3u8' do
+  url = get_camera_url(params['provider'], params['camera'])
+  halt 404, 'Camera not found' unless url
+
+  cdn_headers = PLAYLIST_HEADERS[params['provider']]
+  redirect url unless cdn_headers
+
+  playlist = resolve_playlist(url, cdn_headers)
+  halt 404, 'Camera not found' unless playlist
+  content_type 'application/vnd.apple.mpegurl'
+  playlist
+end
